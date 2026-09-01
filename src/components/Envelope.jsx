@@ -16,7 +16,6 @@ export default function Envelope({ onOpen }) {
   const [leaving, setLeaving] = useState(false)
   const [fading, setFading] = useState(false)
   const [done, setDone] = useState(false)
-  const [flight, setFlight] = useState(null)
   const openRef = useRef(null)
 
   useEffect(() => {
@@ -47,21 +46,38 @@ export default function Envelope({ onOpen }) {
       const to = target.getBoundingClientRect()
 
       document.body.classList.add('is-envelope-flying')
-      setFlight({ ...from.toJSON(), moving: false })
 
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => {
-          setLeaving(true)
-          setFlight({
-            left: to.left,
-            top: to.top,
-            width: to.width,
-            height: to.height,
-            moving: true,
-          })
-        }),
-      )
+      // Полетът се задава направо върху елемента, а не през състояние на
+      // React с `requestAnimationFrame`. При скрит раздел (гостът е сменил
+      // приложението) кадрите спират, обратното извикване не се случва и
+      // пликът оставаше на старото си място. Така крайните стойности се
+      // записват веднага и мястото е вярно във всички случаи.
+      Object.assign(el.style, {
+        position: 'fixed',
+        inset: 'auto',
+        margin: '0',
+        aspectRatio: 'auto',
+        transform: 'none',
+        transition: 'none',
+        left: `${from.left}px`,
+        top: `${from.top}px`,
+        width: `${from.width}px`,
+        height: `${from.height}px`,
+      })
 
+      // Принудително преизчисляване, за да е начална точка на прехода.
+      void el.offsetWidth
+
+      const ease = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
+      el.style.transition = ['left', 'top', 'width', 'height']
+        .map((p) => `${p} ${FLIGHT_DURATION}ms ${ease}`)
+        .join(', ')
+      el.style.left = `${to.left}px`
+      el.style.top = `${to.top}px`
+      el.style.width = `${to.width}px`
+      el.style.height = `${to.height}px`
+
+      setLeaving(true)
       timers.push(setTimeout(finish, FLIGHT_DURATION))
     }
 
@@ -73,24 +89,6 @@ export default function Envelope({ onOpen }) {
   }, [opened, onOpen])
 
   if (done) return null
-
-  const flightStyle = flight
-    ? {
-        position: 'fixed',
-        inset: 'auto',
-        margin: 0,
-        left: `${flight.left}px`,
-        top: `${flight.top}px`,
-        width: `${flight.width}px`,
-        height: `${flight.height}px`,
-        aspectRatio: 'auto',
-        transform: 'none',
-        transition: flight.moving
-          ? `left ${FLIGHT_DURATION}ms var(--ease), top ${FLIGHT_DURATION}ms var(--ease),` +
-            ` width ${FLIGHT_DURATION}ms var(--ease), height ${FLIGHT_DURATION}ms var(--ease)`
-          : 'none',
-      }
-    : undefined
 
   return (
     <div
@@ -122,7 +120,12 @@ export default function Envelope({ onOpen }) {
       <button
         type="button"
         className="envelope__button"
-        onClick={() => setOpened(true)}
+        onClick={() => {
+          // Ако страницата отдолу все пак е помръднала, я връщам най-горе,
+          // преди да се измери целта на полета.
+          window.scrollTo(0, 0)
+          setOpened(true)
+        }}
         disabled={opened}
       >
         <span className="envelope__art">
@@ -135,7 +138,6 @@ export default function Envelope({ onOpen }) {
           <span
             className="envelope__open"
             ref={openRef}
-            style={flightStyle}
             aria-hidden="true"
           >
             <img

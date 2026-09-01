@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useBodyLock from './hooks/useBodyLock'
 
 import Envelope from './components/Envelope'
@@ -20,6 +20,15 @@ import Footer from './components/Footer'
 
 export default function App() {
   const [entered, setEntered] = useState(false)
+
+  // Поканата винаги започва от плика най-горе. Иначе при презареждане
+  // браузърът връща предишната позиция и гостът се озовава по средата.
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+    window.scrollTo(0, 0)
+  }, [])
 
   // Докато пликът е отпред, страницата отдолу не се превърта.
   useBodyLock(!entered)
