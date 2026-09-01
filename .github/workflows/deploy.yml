@@ -30,10 +30,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # `enablement: true` включва Pages, ако още не е включено.
+      # Pages трябва да е включено веднъж ръчно:
+      # Settings → Pages → Source: GitHub Actions.
+      # (Автоматичното включване иска по-широки права от тези на процеса.)
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
