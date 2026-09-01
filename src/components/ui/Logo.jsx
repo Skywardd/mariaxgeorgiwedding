@@ -1,4 +1,4 @@
-import { asset } from '../../lib/asset'
+import { assetUrl } from '../../lib/asset'
 import { couple } from '../../content'
 
 /**
@@ -9,7 +9,7 @@ export default function Logo({ className = '', decorative = false }) {
   return (
     <span
       className={['logo', className].filter(Boolean).join(' ')}
-      style={{ '--logo': `url(${asset('assets/monogram.svg')})` }}
+      style={{ '--logo': `url(${assetUrl('assets/monogram.svg')})` }}
       {...(decorative
         ? { 'aria-hidden': 'true' }
         : {
