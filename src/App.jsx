@@ -27,7 +27,9 @@ export default function App() {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual'
     }
-    window.scrollTo(0, 0)
+    // Без плавно превъртане — при зареждане то се вижда като ненужно
+    // плъзгане на страницата.
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [])
 
   // Докато пликът е отпред, страницата отдолу не се превърта.

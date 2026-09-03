@@ -7,6 +7,13 @@ import InviteDetails from './InviteDetails'
 const HOLD_BEFORE_FLIGHT = 1100
 const FLIGHT_DURATION = 800
 
+/**
+ * Връща страницата най-горе БЕЗ плавна анимация. Плавното превъртане е
+ * включено за целия сайт, но тук би текло успоредно с измерването на
+ * полета и пликът щеше да кацне накриво.
+ */
+const snapToTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -18,6 +25,12 @@ export default function Envelope({ onOpen }) {
   const [done, setDone] = useState(false)
   const openRef = useRef(null)
 
+  // `onOpen` идва като нова функция при всяко пречертаване на App. Ако стои
+  // в зависимостите, ефектът се пуска отново СЛЕД края на прехода и връща
+  // гостa най-горе, докато той вече скролва. Затова се пази в ref.
+  const onOpenRef = useRef(onOpen)
+  onOpenRef.current = onOpen
+
   useEffect(() => {
     if (!opened) return
 
@@ -26,11 +39,16 @@ export default function Envelope({ onOpen }) {
 
     const finish = () => {
       document.body.classList.remove('is-envelope-flying')
-      onOpen?.()
+      onOpenRef.current?.()
       setDone(true)
     }
 
     const start = () => {
+      // Страницата отдолу трябва да е най-горе ПРЕДИ да се измери целта:
+      // така поканата се открива от логото нагоре, а пликът каца точно
+      // където ще стои след това. Обратният ред води до подскок.
+      snapToTop()
+
       const el = openRef.current
       const target = document.querySelector('[data-invite-stage]')
 
@@ -86,7 +104,7 @@ export default function Envelope({ onOpen }) {
       timers.forEach(clearTimeout)
       document.body.classList.remove('is-envelope-flying')
     }
-  }, [opened, onOpen])
+  }, [opened])
 
   if (done) return null
 
@@ -121,9 +139,8 @@ export default function Envelope({ onOpen }) {
         type="button"
         className="envelope__button"
         onClick={() => {
-          // Ако страницата отдолу все пак е помръднала, я връщам най-горе,
-          // преди да се измери целта на полета.
-          window.scrollTo(0, 0)
+          // Ако страницата отдолу все пак е помръднала, я връщам най-горе.
+          snapToTop()
           setOpened(true)
         }}
         disabled={opened}
