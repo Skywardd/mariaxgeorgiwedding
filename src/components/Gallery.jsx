@@ -135,6 +135,21 @@ export default function Gallery() {
         ))}
       </div>
 
+      {gallery.credit && (
+        <Reveal>
+          <p className="gallery__credit">
+            {gallery.credit.label}:{' '}
+            <a
+              href={gallery.credit.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {gallery.credit.name}
+            </a>
+          </p>
+        </Reveal>
+      )}
+
       {openIndex !== null && (
         <Lightbox index={openIndex} onClose={close} onPrev={prev} onNext={next} />
       )}

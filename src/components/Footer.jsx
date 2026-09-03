@@ -12,6 +12,12 @@ export default function Footer() {
           {wedding.dayNumber} {wedding.monthName} {wedding.year}
         </p>
 
+        {footer.credit && (
+          <p className="footer__credit">
+            {footer.credit.label}: {footer.credit.name}
+          </p>
+        )}
+
         <a className="footer__top" href="#top">
           {footer.backToTop}
         </a>

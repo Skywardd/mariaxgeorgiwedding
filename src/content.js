@@ -319,6 +319,13 @@ export const faq = {
 export const gallery = {
   kicker: 'Спомени',
   title: 'от нас',
+  // Адресът е изчистен от следящия параметър, с който се споделя от
+  // приложението — води към същия профил.
+  credit: {
+    label: 'Снимки',
+    name: 'Мартина Чикова',
+    url: 'https://www.instagram.com/martinachikova',
+  },
   closeLabel: 'Затвори',
   prevLabel: 'Предишна снимка',
   nextLabel: 'Следваща снимка',
@@ -326,6 +333,7 @@ export const gallery = {
 
 export const footer = {
   backToTop: 'обратно нагоре',
+  credit: { label: 'Сайт', name: 'Ивет' },
 }
 
 export const navLabels = {
