@@ -24,10 +24,13 @@ async function sendToGoogleForm(values) {
   }
 
   const coming = values.attending === form.attendingOptions.yes
+  const withSecond = coming && hasSecondGuest(values)
   append(form.fields.name, values.name.trim())
   append(form.fields.attending, values.attending)
   append(form.fields.guests, coming ? values.guests : '')
   append(form.fields.menu, coming ? values.menu : '')
+  append(form.fields.guest2Name, withSecond ? values.guest2Name.trim() : '')
+  append(form.fields.guest2Menu, withSecond ? values.guest2Menu : '')
   append(form.fields.diet, values.diet.trim())
   append(form.fields.message, values.message.trim())
 
@@ -48,6 +51,7 @@ async function sendBackup(values) {
   if (!url) return { skipped: true }
 
   const coming = values.attending === form.attendingOptions.yes
+  const withSecond = coming && hasSecondGuest(values)
 
   const payload = {
     subject,
@@ -55,6 +59,8 @@ async function sendBackup(values) {
     'Ще присъства': values.attending,
     'Брой гости': coming ? values.guests : '',
     Меню: coming ? values.menu : '',
+    'Втори гост': withSecond ? values.guest2Name.trim() : '',
+    'Меню на втория гост': withSecond ? values.guest2Menu : '',
     Алергии: values.diet.trim(),
     Съобщение: values.message.trim(),
     Изпратено: new Date().toISOString(),
@@ -77,9 +83,14 @@ const emptyValues = {
   // Празно, за да избере гостът броя съзнателно.
   guests: '',
   menu: '',
+  guest2Name: '',
+  guest2Menu: '',
   diet: '',
   message: '',
 }
+
+/** При двама гости питаме за името и менюто и на втория. */
+const hasSecondGuest = (values) => Number(values.guests) > 1
 
 function Required() {
   return (
@@ -107,6 +118,26 @@ export default function RsvpForm() {
   }
 
   const isComing = values.attending === form.attendingOptions.yes
+  const showSecondGuest = isComing && hasSecondGuest(values)
+
+  // При връщане към един гост полетата за втория се изчистват — иначе
+  // тръгва отговор, който гостът вече не вижда на екрана.
+  const updateGuests = (event) => {
+    const guests = event.target.value
+    const second = Number(guests) > 1
+    setValues((prev) => ({
+      ...prev,
+      guests,
+      guest2Name: second ? prev.guest2Name : '',
+      guest2Menu: second ? prev.guest2Menu : '',
+    }))
+    setErrors((prev) => ({
+      ...prev,
+      guests: undefined,
+      guest2Name: undefined,
+      guest2Menu: undefined,
+    }))
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -116,6 +147,12 @@ export default function RsvpForm() {
     if (!values.attending) nextErrors.attending = form.errors.attending
     if (isComing && !values.guests) nextErrors.guests = form.errors.guests
     if (isComing && !values.menu) nextErrors.menu = form.errors.menu
+    if (showSecondGuest && !values.guest2Name.trim()) {
+      nextErrors.guest2Name = form.errors.guest2Name
+    }
+    if (showSecondGuest && !values.guest2Menu) {
+      nextErrors.guest2Menu = form.errors.guest2Menu
+    }
 
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
@@ -241,7 +278,7 @@ export default function RsvpForm() {
               name="guests"
               aria-required="true"
               value={values.guests}
-              onChange={update('guests')}
+              onChange={updateGuests}
               aria-invalid={Boolean(errors.guests)}
             >
               <option value="" disabled>
@@ -281,6 +318,63 @@ export default function RsvpForm() {
             </div>
             {errors.menu && <p className="field__error">{errors.menu}</p>}
           </fieldset>
+
+          {showSecondGuest && (
+            <>
+              <div className="field">
+                <label className="field__label" htmlFor="rsvp-guest2-name">
+                  {form.labels.guest2Name}
+                  <Required />
+                </label>
+                <input
+                  className="field__input"
+                  id="rsvp-guest2-name"
+                  name="guest2Name"
+                  type="text"
+                  aria-required="true"
+                  value={values.guest2Name}
+                  onChange={update('guest2Name')}
+                  aria-invalid={Boolean(errors.guest2Name)}
+                  aria-describedby={
+                    errors.guest2Name ? 'rsvp-guest2-name-error' : undefined
+                  }
+                />
+                {errors.guest2Name && (
+                  <p className="field__error" id="rsvp-guest2-name-error">
+                    {errors.guest2Name}
+                  </p>
+                )}
+              </div>
+
+              <fieldset className="field field--choice" aria-required="true">
+                <legend className="field__label">
+                  {form.labels.guest2Menu}
+                  <Required />
+                </legend>
+                <div className="choice">
+                  {form.menuOptions.map((option) => (
+                    <button
+                      type="button"
+                      key={option}
+                      className={[
+                        'choice__option',
+                        values.guest2Menu === option && 'is-selected',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      aria-pressed={values.guest2Menu === option}
+                      onClick={() => choose('guest2Menu')(option)}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                {errors.guest2Menu && (
+                  <p className="field__error">{errors.guest2Menu}</p>
+                )}
+              </fieldset>
+            </>
+          )}
 
           <div className="field">
             <label className="field__label" htmlFor="rsvp-diet">
