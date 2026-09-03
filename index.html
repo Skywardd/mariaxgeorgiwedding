@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#F7F3EE" />
+
+    <script>
+      /* Нарочно тук, а не в React: браузърът връща предишната позиция при
+         презареждане още преди кодът на страницата да се е свалил. На
+         телефон това ставаше след като поканата вече се е отворила и тя
+         се показваше по средата, без логото. */
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+    </script>
     <title>Мария и Георги — 	Сватбена покана</title>
     <meta
       name="description"

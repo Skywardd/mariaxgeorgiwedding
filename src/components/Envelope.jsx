@@ -12,7 +12,12 @@ const FLIGHT_DURATION = 800
  * включено за целия сайт, но тук би текло успоредно с измерването на
  * полета и пликът щеше да кацне накриво.
  */
-const snapToTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+const snapToTop = () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  // Резерва: на iOS обектната форма понякога се подминава мълчаливо.
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+}
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
@@ -33,6 +38,10 @@ export default function Envelope() {
 
     const finish = () => {
       document.body.classList.remove('is-envelope-flying')
+      // Последна проверка точно преди поканата да се открие. Ако нищо не
+      // е мръднало след измерването, това не прави нищо; ако браузърът е
+      // върнал стара позиция междувременно, я поправя.
+      snapToTop()
       setDone(true)
     }
 
