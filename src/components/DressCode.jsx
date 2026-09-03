@@ -15,20 +15,29 @@ export default function DressCode() {
         <Reveal className="split__body" delay={120}>
           <Heading kicker={dressCode.kicker} title={dressCode.title} />
 
+          {/* Нов ред в текста става нов абзац. */}
           <div className="prose">
-            <p>{dressCode.intro}</p>
+            {dressCode.intro.split('\n').map((line) => (
+              <p key={line}>{line}</p>
+            ))}
           </div>
 
-          <dl className="dress__list">
-            {dressCode.items.map((item) => (
-              <div key={item.label}>
-                <dt>{item.label}</dt>
-                <dd>{item.text}</dd>
-              </div>
-            ))}
-          </dl>
+          {/* Списъкът с „Дами“ и „Господа“ е по избор — ако го няма
+              в `content.js`, секцията просто остава без него. */}
+          {dressCode.items?.length > 0 && (
+            <dl className="dress__list">
+              {dressCode.items.map((item) => (
+                <div key={item.label}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.text}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
 
-          <p className="split__closing">{dressCode.closing}</p>
+          {dressCode.closing && (
+            <p className="split__closing">{dressCode.closing}</p>
+          )}
         </Reveal>
       </div>
     </Section>
