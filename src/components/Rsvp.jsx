@@ -30,6 +30,13 @@ export default function Rsvp() {
             </ul>
           </>
         )}
+
+        {rsvp.dayOf && (
+          <p className="rsvp__day-of">
+            {rsvp.dayOf.text} — {rsvp.dayOf.phoneLabel}{' '}
+            <a href={telHref(rsvp.dayOf.phone)}>{rsvp.dayOf.phone}</a>
+          </p>
+        )}
       </Reveal>
     </Section>
   )

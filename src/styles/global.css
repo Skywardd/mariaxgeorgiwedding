@@ -1637,6 +1637,31 @@ body.is-envelope-flying [data-invite-stage] {
   margin-right: 0.5em;
 }
 
+/* Кумата, която поема въпросите в самия ден — отделена от телефоните
+   на двойката с тънка черта, за да не се слее с тях. */
+.rsvp__day-of {
+  max-width: 34rem;
+  margin: 1.75rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  font-style: italic;
+  color: var(--ink-soft);
+  text-wrap: balance;
+}
+
+.rsvp__day-of a {
+  font-style: normal;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  transition: border-color 0.35s var(--ease);
+}
+
+.rsvp__day-of a:hover {
+  border-bottom-color: var(--accent);
+}
+
 /* ============================================================
    Въпроси
    ============================================================ */
