@@ -89,6 +89,17 @@ const emptyValues = {
   message: '',
 }
 
+// Редът, в който полетата стоят във формата. Използва се, за да се стигне
+// до ПЪРВОТО сгрешено поле, а не до случайно от списъка с грешки.
+const FIELD_ORDER = [
+  'name',
+  'attending',
+  'guests',
+  'menu',
+  'guest2Name',
+  'guest2Menu',
+]
+
 /** При двама гости питаме за името и менюто и на втория. */
 const hasSecondGuest = (values) => Number(values.guests) > 1
 
@@ -166,6 +177,14 @@ export default function RsvpForm() {
 
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
+      // Иначе гостът натиска „Изпрати“ и сякаш нищо не се случва —
+      // грешката стои извън екрана. Полето вече е на страницата, затова
+      // не се чака ново изчертаване. `center` го оставя далеч от лентата
+      // с менюто, която покрива горния край.
+      const firstKey = FIELD_ORDER.find((key) => nextErrors[key])
+      const field = rootRef.current?.querySelector(`[data-field="${firstKey}"]`)
+      field?.scrollIntoView({ block: 'center' })
+      field?.querySelector('input, select, button')?.focus({ preventScroll: true })
       return
     }
 
@@ -219,7 +238,7 @@ export default function RsvpForm() {
     <form className="rsvp-form" onSubmit={handleSubmit} noValidate ref={rootRef}>
       {isPreview && <p className="rsvp-form__preview">{form.previewNotice}</p>}
 
-      <div className="field">
+      <div className="field" data-field="name">
         <label className="field__label" htmlFor="rsvp-name">
           {form.labels.name}
           <Required />
@@ -243,7 +262,7 @@ export default function RsvpForm() {
         )}
       </div>
 
-      <fieldset className="field field--choice" aria-required="true">
+      <fieldset className="field field--choice" aria-required="true" data-field="attending">
         <legend className="field__label">
           {form.labels.attending}
           <Required />
@@ -271,7 +290,7 @@ export default function RsvpForm() {
 
       {isComing && (
         <>
-          <div className="field">
+          <div className="field" data-field="guests">
             <label className="field__label" htmlFor="rsvp-guests">
               {form.labels.guests}
               <Required />
@@ -303,7 +322,7 @@ export default function RsvpForm() {
             {errors.guests && <p className="field__error">{errors.guests}</p>}
           </div>
 
-          <fieldset className="field field--choice" aria-required="true">
+          <fieldset className="field field--choice" aria-required="true" data-field="menu">
             <legend className="field__label">
               {form.labels.menu}
               <Required />
@@ -331,7 +350,7 @@ export default function RsvpForm() {
 
           {showSecondGuest && (
             <>
-              <div className="field">
+              <div className="field" data-field="guest2Name">
                 <label className="field__label" htmlFor="rsvp-guest2-name">
                   {form.labels.guest2Name}
                   <Required />
@@ -356,7 +375,7 @@ export default function RsvpForm() {
                 )}
               </div>
 
-              <fieldset className="field field--choice" aria-required="true">
+              <fieldset className="field field--choice" aria-required="true" data-field="guest2Menu">
                 <legend className="field__label">
                   {form.labels.guest2Menu}
                   <Required />
