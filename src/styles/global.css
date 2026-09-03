@@ -282,7 +282,10 @@ a {
    остава плътен и отлита на мястото си върху поканата. */
 .envelope__backdrop {
   position: absolute;
-  inset: 0;
+  /* На телефон `position: fixed` се свива до видимата част без лентите на
+     браузъра. Тогава под плика се показваше гола ивица от фона на body.
+     Затова хартията се разлива добре извън екрана във всички посоки. */
+  inset: -30vh -10vw;
   z-index: -1;
   background-color: var(--cream);
   background-size: cover;
@@ -384,7 +387,10 @@ body.is-envelope-flying [data-invite-stage] {
   max-height: 100%;
   width: auto;
   max-width: 100%;
-  filter: drop-shadow(0 26px 42px rgba(90, 72, 52, 0.22));
+  /* Пликът е правоъгълен, затова сянката му също е правоъгълник. При широк
+     размах тя се чете като сив панел зад плика вместо като лека сянка —
+     оттам и по-стегнатите стойности. */
+  filter: drop-shadow(0 10px 16px rgba(90, 72, 52, 0.13));
   transition: opacity 0.7s var(--ease), transform 1s var(--ease);
 }
 
