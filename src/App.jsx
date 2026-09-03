@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import useBodyLock from './hooks/useBodyLock'
+import { useEffect } from 'react'
 
 import Envelope from './components/Envelope'
 import Nav from './components/Nav'
@@ -19,8 +18,6 @@ import Gallery from './components/Gallery'
 import Footer from './components/Footer'
 
 export default function App() {
-  const [entered, setEntered] = useState(false)
-
   // Поканата винаги започва от плика най-горе. Иначе при презареждане
   // браузърът връща предишната позиция и гостът се озовава по средата.
   useEffect(() => {
@@ -32,12 +29,14 @@ export default function App() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [])
 
-  // Докато пликът е отпред, страницата отдолу не се превърта.
-  useBodyLock(!entered)
-
   return (
     <>
-      <Envelope onOpen={() => setEntered(true)} />
+      {/* Пликът НЕ заключва страницата. На iOS `overflow: hidden` върху
+          body не спира плъзгането, но клампва `scrollY` до нула — тогава
+          връщането най-горе е привидно и поканата се откриваше по средата.
+          Движението се спира с `touch-action` върху самия плик, а точната
+          позиция — с превъртане най-горе преди измерването на полета. */}
+      <Envelope />
 
       <Nav />
 
