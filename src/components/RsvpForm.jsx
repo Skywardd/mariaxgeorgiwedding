@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { rsvp } from '../content'
 
 const { form } = rsvp
@@ -104,6 +104,7 @@ export default function RsvpForm() {
   const [values, setValues] = useState(emptyValues)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle') 
+  const rootRef = useRef(null)
   const isConfigured = Boolean(form.formId && form.fields.name)
   const isPreview = form.preview || !isConfigured
 
@@ -116,6 +117,15 @@ export default function RsvpForm() {
     setValues((prev) => ({ ...prev, [key]: value }))
     setErrors((prev) => ({ ...prev, [key]: undefined }))
   }
+
+  // След изпращането формата се сменя с кратко съобщение и страницата се
+  // скъсява — гостът оставаше да гледа въпросите по-надолу, вместо
+  // благодарността. Затова се връщаме в началото на секцията.
+  useEffect(() => {
+    if (status !== 'done') return
+    const root = rootRef.current
+    ;(root?.closest('section') ?? root)?.scrollIntoView({ block: 'start' })
+  }, [status])
 
   const isComing = values.attending === form.attendingOptions.yes
   const showSecondGuest = isComing && hasSecondGuest(values)
@@ -198,7 +208,7 @@ export default function RsvpForm() {
     const message = isComing ? form.success.yes : form.success.no
 
     return (
-      <div className="rsvp-form__done" role="status">
+      <div className="rsvp-form__done" role="status" ref={rootRef}>
         <p className="rsvp-form__done-title">{message.title}</p>
         <p className="rsvp-form__done-text">{message.text}</p>
       </div>
@@ -206,7 +216,7 @@ export default function RsvpForm() {
   }
 
   return (
-    <form className="rsvp-form" onSubmit={handleSubmit} noValidate>
+    <form className="rsvp-form" onSubmit={handleSubmit} noValidate ref={rootRef}>
       {isPreview && <p className="rsvp-form__preview">{form.previewNotice}</p>}
 
       <div className="field">
